@@ -1,0 +1,83 @@
+/* Login.css */
+
+/* General container styling */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8f9fa; /* Light background color */
+    padding: 20px;
+  }
+  
+  /* Styling for the login box */
+  .login-box {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+  }
+  
+  /* Header styling */
+  .login-box h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Styling for form elements */
+  .form-control {
+    border-radius: 4px;
+    box-shadow: none; /* Remove default input shadow */
+  }
+  
+  .btn {
+    border-radius: 4px;
+  }
+  
+  .btn-default {
+    color: #000;
+  }
+  
+  .btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+  }
+  
+  .btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+  }
+  
+  /* Error message styling */
+  .text-danger {
+    color: #dc3545;
+    font-size: 0.875rem;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 576px) {
+    .login-box {
+      padding: 15px;
+      max-width: 100%;
+    }
+  
+    .btn {
+      font-size: 0.875rem;
+    }
+  }
+  
+  @media (min-width: 577px) and (max-width: 768px) {
+    .login-box {
+      padding: 20px;
+      max-width: 90%;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .login-box {
+      padding: 30px;
+    }
+  }
+  
