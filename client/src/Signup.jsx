@@ -1,82 +1,297 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './Signup.css';
-import Navbar from './Navbar';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Button, Modal, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-function Signup() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+function Users() {
+    const [users, setUsers] = useState([]);
+    const [show, setShow] = useState(false);
+    const [showEdit, setShowEdit] = useState(false);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        mobile: '',
+        designation: '',
+        gender: '',
+        course: ''
+    });
+    const [currentUserId, setCurrentUserId] = useState(null);
+    const navigate = useNavigate(); // Initialize useNavigate
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    axios.post('http://localhost:3001/register', { username, email, password })
-      .then(result => {
-        console.log(result);
-        navigate('/login');
-      })
-      .catch(err => console.log(err));
-  };
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.get('http://localhost:3001/users', {
+                headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            setUsers(response.data);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
 
-  return (
-    <>
-      <Navbar />
-      <div className="signup-container">
-        <div className="signup-box">
-          <h2>Register</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="username">
-                <strong>Username</strong>
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Username"
-                autoComplete="off"
-                name="username"
-                className="form-control rounded-0"
-                onChange={(e) => setUsername(e.target.value)}
-              />
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    const handleInputChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post('http://localhost:3001/users', formData, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            fetchUsers();
+            setShow(false);
+        } catch (error) {
+            console.error('Error creating user:', error);
+        }
+    };
+
+    const handleEdit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put(`http://localhost:3001/users/${currentUserId}`, formData, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            fetchUsers();
+            setShowEdit(false);
+        } catch (error) {
+            console.error('Error updating user:', error);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`http://localhost:3001/users/${id}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            fetchUsers();
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    };
+
+    const handleLogout = () => {
+        // Clear token and navigate to login page
+        localStorage.removeItem('authToken'); // Ensure 'authToken' is used
+        navigate('/login'); // Use navigate to go to the login page
+    };
+
+    return (
+        <div className="d-flex vh-100 bg-primary justify-content-center align-items-center">
+            <div className='w-50 bg-white rounded p-3'>
+                <Button variant="success" onClick={() => setShow(true)}>
+                    Add +
+                </Button>
+                <Button variant="danger" onClick={handleLogout}>
+                    Logout
+                </Button>
+                <Modal show={show} onHide={() => setShow(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Add User</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group controlId="formName">
+                                <Form.Label>Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter name"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formEmail">
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    placeholder="Enter email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formMobile">
+                                <Form.Label>Mobile</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter mobile number"
+                                    name="mobile"
+                                    value={formData.mobile}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formDesignation">
+                                <Form.Label>Designation</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter designation"
+                                    name="designation"
+                                    value={formData.designation}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formGender">
+                                <Form.Label>Gender</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter gender"
+                                    name="gender"
+                                    value={formData.gender}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formCourse">
+                                <Form.Label>Course</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter course"
+                                    name="course"
+                                    value={formData.course}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Button variant="primary" type="submit">
+                                Submit
+                            </Button>
+                        </Form>
+                    </Modal.Body>
+                </Modal>
+                <Modal show={showEdit} onHide={() => setShowEdit(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Edit User</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={handleEdit}>
+                            <Form.Group controlId="formName">
+                                <Form.Label>Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter name"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formEmail">
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    placeholder="Enter email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formMobile">
+                                <Form.Label>Mobile</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter mobile number"
+                                    name="mobile"
+                                    value={formData.mobile}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formDesignation">
+                                <Form.Label>Designation</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter designation"
+                                    name="designation"
+                                    value={formData.designation}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formGender">
+                                <Form.Label>Gender</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter gender"
+                                    name="gender"
+                                    value={formData.gender}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formCourse">
+                                <Form.Label>Course</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter course"
+                                    name="course"
+                                    value={formData.course}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Button variant="primary" type="submit">
+                                Save Changes
+                            </Button>
+                        </Form>
+                    </Modal.Body>
+                </Modal>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Designation</th>
+                            <th>Gender</th>
+                            <th>Course</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map(user => (
+                            <tr key={user._id}>
+                                <td>{user.name}</td>
+                                <td>{user.email}</td>
+                                <td>{user.mobile}</td>
+                                <td>{user.designation}</td>
+                                <td>{user.gender}</td>
+                                <td>{user.course}</td>
+                                <td>
+                                    <Button
+                                        className='btn btn-sm btn-success'
+                                        onClick={() => {
+                                            setFormData(user);
+                                            setCurrentUserId(user._id);
+                                            setShowEdit(true);
+                                        }}
+                                    >
+                                        Update
+                                    </Button>
+                                    <Button
+                                        className='btn btn-sm btn-danger'
+                                        onClick={() => handleDelete(user._id)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
-            <div className="mb-3">
-              <label htmlFor="email">
-                <strong>Email</strong>
-              </label>
-              <input
-                type="email"
-                placeholder="Enter Email"
-                name="email"
-                className="form-control rounded-0"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="password">
-                <strong>Password</strong>
-              </label>
-              <input
-                type="password"
-                placeholder="Enter Password"
-                name="password"
-                className="form-control rounded-0"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <button type="submit" className="btn btn-success w-100 rounded-0">
-              Register
-            </button>
-          </form>
-          <p className="mt-3">Already Have an Account?</p>
-          <Link to="/login" className="btn btn-default border w-100 bg-light rounded-0 text-decoration-none">
-            Login
-          </Link>
         </div>
-      </div>
-    </>
-  );
+    );
 }
 
-export default Signup;
+export default Users;
